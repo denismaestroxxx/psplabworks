@@ -1,5 +1,6 @@
 ﻿using Server.Sorting;
 using System;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -21,13 +22,13 @@ namespace Server
 
         public HttpServer(int port = 5001)
         {
-            _serverCertificate = new X509Certificate2("d:/IdentityServer4_certificate.pfx", "P@55w0rd");
+            _serverCertificate = new X509Certificate2("D:/contoso.com.pfx", "password");
             _port = port;
         }
 
         public void Start()
         {
-            var listener = new TcpListener(IPAddress.Any, _port);
+            var listener = new TcpListener(IPAddress.Loopback, _port);
             listener.Start();
             while (true)
             {
@@ -48,7 +49,7 @@ namespace Server
             var secureStream = new SslStream(stream, false);
             try
             {
-                secureStream.AuthenticateAsServer(_serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
+                secureStream.AuthenticateAsServer(_serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: true, enabledSslProtocols: SslProtocols.None);
                 secureStream.ReadTimeout = 10000;
                 secureStream.WriteTimeout = 10000;
 
