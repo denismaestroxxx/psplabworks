@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <style>
+    textarea {
+      vertical-align: bottom;
+    }
+    #output {
+      overflow: auto;
+    }
+    #output > p {
+      overflow-wrap: break-word;
+    }
+    #output span {
+      color: blue;
+    }
+    #output span.error {
+      color: red;
+    }
+	table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+  </style>
+  <body>
+    <h2>Currencies data</h2>
+    <div id="output"></div>
+	<table>
+<thead>
+        <tr>
+            <th>Sell USD</th>
+			<th>Buy USD</th>
+			<th>Sell RUB</th>
+			<th>Buy RUB</th>
+        </tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+  </body>
+  <script>
+    const output = document.querySelector("#output");
+    const wsUri = "ws://127.0.0.1:5015/";
+    const websocket = new WebSocket(wsUri);
+
+    websocket.onopen = (e) => {
+      writeToScreen("CONNECTED");
+      doSend("WebSocket connect");
+    };
+
+    websocket.onclose = (e) => {
+      writeToScreen("DISCONNECTED");
+    };
+
+    websocket.onmessage = (e) => {
+	let tBody = document.querySelector('tbody');
+	let currency = JSON.parse(e.data);
+	let newRow = `
+    <tr>
+    <td>${currency.SellUSD}</td>
+	<td>${currency.BuyUSD}</td>
+	<td>${currency.SellRUB}</td>
+	<td>${currency.BuyRUB}</td>
+    </tr>
+    `;
+		
+	tBody.innerHTML = newRow;
+    };
+
+    websocket.onerror = (e) => {
+      writeToScreen(`<span class="error">ERROR:</span> ${e.data}`);
+    };
+
+    function doSend(message) {
+      writeToScreen(`SENT: ${message}`);
+      websocket.send(message);
+    }
+
+    function writeToScreen(message) {
+      output.insertAdjacentHTML("afterbegin", `<p>${message}</p>`);
+    }
+  </script>
+</html>
